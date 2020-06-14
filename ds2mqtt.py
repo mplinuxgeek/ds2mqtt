@@ -6,7 +6,7 @@ import configparser
 from w1thermsensor import W1ThermSensor
 import paho.mqtt.client as mqtt
 
-import configparser
+config = configparser.ConfigParser()
 config.read('config.ini')
 broker_address = config.get('mqtt', 'broker')
 port = config.get('mqtt', 'broker')
