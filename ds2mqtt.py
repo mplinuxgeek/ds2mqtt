@@ -32,14 +32,19 @@ TYPE_NAMES = {
 degree = u"\N{DEGREE SIGN}"
 
 def on_connect(client, userdata, flags, rc):
-    print("Connected with result code {}".format(rc))
-
-client = mqtt.Client()
-client.on_connect = on_connect
-if user != "" and password != "":
-    client.username_pw_set(user, password=password)
-client.connect(broker)
-client.loop_start()
+    if int(str(rc)) == 0:
+        print("Connection successful")
+        client.connected = True
+    elif int(str(rc)) == 1:
+        print("Connection refused - incorrect protocol version")
+    elif int(str(rc)) == 2:
+        print("Connection refused - invalid client identifier")
+    elif int(str(rc)) == 3:
+        print("Connection refused - server unavailable")
+    elif int(str(rc)) == 4:
+        print("Connection refused - bad username or password")
+    elif int(str(rc)) == 5:
+        print("Connection refused - not authorised")
 
 def device_config(id, type):
     device = {}
@@ -55,12 +60,24 @@ def device_config(id, type):
         "name": sensor.id,
     }
     return json.dumps(device)
-    
+
+mqtt.Client.connected = False
+client = mqtt.Client()
+client.on_connect = on_connect
+if user != "" and password != "":
+    client.username_pw_set(user, password=password)
+client.connect(broker)
+client.loop_start()
+
+print("Connecting")
+while not client.connected:
+    time.sleep(0.2)
+
 for sensor in W1ThermSensor.get_available_sensors():
     sensor_type_name = TYPE_NAMES.get(sensor.type, hex(sensor.type))
     device = device_config(sensor.id, sensor_type_name)
     client.publish("homeassistant/sensor/" + sensor.id + "/temp/config",device)
-   
+
 while True:
     for sensor in W1ThermSensor.get_available_sensors():
         temperature = sensor.get_temperature()
