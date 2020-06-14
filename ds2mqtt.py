@@ -9,10 +9,10 @@ import paho.mqtt.client as mqtt
 config = configparser.ConfigParser()
 config.read('config.ini')
 broker = config.get('mqtt', 'broker')
-port = config.get('mqtt', 'broker')
-user = config.get('mqtt', 'broker')
-password = config.get('mqtt', 'broker')
-topic = config.get('mqtt', 'broker')
+port = config.get('mqtt', 'port')
+user = config.get('mqtt', 'user')
+password = config.get('mqtt', 'pass')
+topic = config.get('mqtt', 'topic')
 
 THERM_SENSOR_DS18S20 = 0x10
 THERM_SENSOR_DS1822 = 0x22
