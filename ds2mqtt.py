@@ -8,7 +8,7 @@ import paho.mqtt.client as mqtt
 
 config = configparser.ConfigParser()
 config.read('config.ini')
-broker_address = config.get('mqtt', 'broker')
+broker = config.get('mqtt', 'broker')
 port = config.get('mqtt', 'broker')
 user = config.get('mqtt', 'broker')
 password = config.get('mqtt', 'broker')
@@ -38,7 +38,7 @@ client = mqtt.Client()
 client.on_connect = on_connect
 if user != "" and password != "":
     client.username_pw_set(user, password=password)
-client.connect(broker_address)
+client.connect(broker)
 client.loop_start()
 
 def device_config(id, type):
