@@ -46,6 +46,9 @@ def on_connect(client, userdata, flags, rc):
     elif int(str(rc)) == 5:
         print("Connection refused - not authorised")
 
+def on_message(client, userdata, msg):
+    print(msg.topic+" "+str(msg.qos)+" "+str(msg.payload)) 
+
 def device_config(id, type):
     device = {}
     device['unit_of_measurement'] = degree + 'C'
@@ -64,12 +67,13 @@ def device_config(id, type):
 mqtt.Client.connected = False
 client = mqtt.Client()
 client.on_connect = on_connect
+client.on_message = on_message
 if user != "" and password != "":
     client.username_pw_set(user, password=password)
 client.connect(broker)
 client.loop_start()
 
-print("Connecting")
+print("Connecting to " + broker)
 while not client.connected:
     time.sleep(0.2)
 
@@ -80,8 +84,9 @@ for sensor in W1ThermSensor.get_available_sensors():
 
 while True:
     for sensor in W1ThermSensor.get_available_sensors():
+        sensor_type_name = TYPE_NAMES.get(sensor.type, hex(sensor.type))
         temperature = sensor.get_temperature()
         sensor_id = sensor.id
-        print("Sensor %s has temperature %.2f" % (sensor_id, temperature))
+        print("%s %s %.2f" % (sensor_type_name, sensor_id, temperature))
         client.publish(topic + "/sensor/" + sensor_id +'/state', round(temperature,2))
     time.sleep(30)
