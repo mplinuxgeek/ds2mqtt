@@ -67,7 +67,7 @@ def on_disconnect(client, userdata, rc):
         logger.error("Unexpected disconnection. RC = " + str(rc))
 
 def on_publish(client, userdata, mid):
-    logger.info("Message " +str(client)+ " published.")
+    logger.info("Message " +str(mid)+ " published.")
                     
 def device_config(id, name):
     device = {}
@@ -90,7 +90,7 @@ def connect_to_broker(host):
     client = mqtt.Client()
     client.on_connect = on_connect
     #client.on_message = on_message
-    client.on_publish = on_publish
+    #client.on_publish = on_publish
     if username != "" and password != "":
         client.username_pw_set(username, password=password)
     client.connect(host)
