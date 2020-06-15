@@ -120,7 +120,7 @@ def get_config():
 
 def get_sensors():
     get_sensors = W1ThermSensor.get_available_sensors()
-    logger.info("Found %s sensors" % (len(sensors)))
+    logger.info("Found %s sensors" % (len(get_sensors)))
     return get_sensors
 
 def publish_config(sensors):
