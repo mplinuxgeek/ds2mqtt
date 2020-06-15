@@ -138,6 +138,7 @@ def publish_sensors(sensors):
     
 
 def main():
+    global degree
     degree = u"\N{DEGREE SIGN}"
     signal.signal(signal.SIGINT, keyboardInterruptHandler)
     setup_logging()
