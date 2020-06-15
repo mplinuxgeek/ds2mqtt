@@ -138,13 +138,16 @@ def publish_sensors(sensors):
     logger.info("Sleeping for %s seconds" % (interval))
     time.sleep(float(interval))
     
-signal.signal(signal.SIGINT, keyboardInterruptHandler)
 
-setup_logging()
-get_config()
-connect_to_broker(broker)
-sensors = get_sensors()
-publish_config(sensors)
+def main():
+    signal.signal(signal.SIGINT, keyboardInterruptHandler)
+    setup_logging()
+    get_config()
+    connect_to_broker(broker)
+    sensors = get_sensors()
+    publish_config(sensors)
+    while True:
+        publish_sensors(sensors)
 
-while True:
-    publish_sensors(sensors)
+if __name__ == "__main__":
+    main()
