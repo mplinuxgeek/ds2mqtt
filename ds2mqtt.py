@@ -62,9 +62,13 @@ def on_connect(client, userdata, flags, rc):
     elif int(str(rc)) == 5:
         logger.warn("Connection refused - not authorised")
 
-def on_message(client, userdata, msg):
-    logger.info(msg.topic+" "+str(msg.qos)+" "+str(msg.payload)) 
+def on_disconnect(client, userdata, rc):
+    if rc != 0:
+        logger.error("Unexpected disconnection. RC = " + str(rc))
 
+def on_publish(client, userdata, mid):
+    logger.info("Message " +str(mid)+ " published.")
+                    
 def device_config(id, name):
     device = {}
     device['unit_of_measurement'] = degree + 'C'
@@ -85,7 +89,8 @@ def connect_to_broker(host):
     mqtt.Client.connected = False
     client = mqtt.Client()
     client.on_connect = on_connect
-    client.on_message = on_message
+    #client.on_message = on_message
+    client.on_publish = on_publish
     if username != "" and password != "":
         client.username_pw_set(username, password=password)
     client.connect(host)
