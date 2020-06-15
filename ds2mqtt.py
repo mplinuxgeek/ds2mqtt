@@ -9,9 +9,11 @@ import logging
 from w1thermsensor import W1ThermSensor
 import paho.mqtt.client as mqtt
 
+
 def keyboardInterruptHandler(signal, frame):
     logger.info("KeyboardInterrupt (ID: {}), exiting...".format(signal))
     exit(0)
+
 
 def setup_logging():
     global logger
@@ -32,11 +34,12 @@ def setup_logging():
     logger.addHandler(ch)
     logger.addHandler(fh)
 
-#logger.debug('debug message')
-#logger.info('info message')
-#logger.warn('warn message')
-#logger.error('error message')
-#logger.critical('critical message')
+# logger.debug('debug message')
+# logger.info('info message')
+# logger.warn('warn message')
+# logger.error('error message')
+# logger.critical('critical message')
+
 
 def get_config_safe(section, option, default=None):
     try:
@@ -44,6 +47,7 @@ def get_config_safe(section, option, default=None):
     except (configparser.NoOptionError, configparser.NoSectionError, ValueError):
         logger.info('Could not find section [%s] option "%s"' % (section, option))
         return default
+
 
 def on_connect(client, userdata, flags, rc):
     if int(str(rc)) == 0:
@@ -60,13 +64,16 @@ def on_connect(client, userdata, flags, rc):
     elif int(str(rc)) == 5:
         logger.warn("Connection refused - not authorised")
 
+
 def on_disconnect(client, userdata, rc):
     if rc != 0:
         logger.error("Unexpected disconnection. RC = " + str(rc))
 
+
 def on_publish(client, userdata, mid):
-    logger.info("Message " +str(mid)+ " published.")
-                    
+    logger.info("Message " + str(mid) + " published.")
+
+
 def device_config(id, name):
     device = {}
     device['unit_of_measurement'] = degree + 'C'
@@ -74,7 +81,7 @@ def device_config(id, name):
     device['name'] = id
     device['state_topic'] = topic + '/sensor/' + id + '/state'
     device['unique_id'] = id
-    device['device'] =  {
+    device['device'] = {
         "identifiers": id,
         "manufacturer": "Dallas",
         "model": name,
@@ -82,20 +89,22 @@ def device_config(id, name):
     }
     return json.dumps(device)
 
+
 def connect_to_broker(host):
     global client
     logger.info("Connecting to " + broker)
     mqtt.Client.connected = False
     client = mqtt.Client()
     client.on_connect = on_connect
-    #client.on_message = on_message
-    #client.on_publish = on_publish
+    # client.on_message = on_message
+    # client.on_publish = on_publish
     if username != "" and password != "":
         client.username_pw_set(username, password=password)
     client.connect(host)
     client.loop_start()
     while not client.connected:
         time.sleep(0.2)
+
 
 def get_config():
     global config, homeassistant, interval, broker, port, username, password, topic
@@ -109,33 +118,37 @@ def get_config():
         exit(5)
 
     homeassistant = get_config_safe('general', 'homeassistant')
-    interval = get_config_safe('general', 'interval','30')
+    interval = get_config_safe('general', 'interval', '30')
     broker = get_config_safe('mqtt', 'broker')
     port = get_config_safe('mqtt', 'port', '1884')
     username = get_config_safe('mqtt', 'username')
     password = get_config_safe('mqtt', 'password')
     topic = get_config_safe('mqtt', 'topic')
 
+
 def get_sensors():
     get_sensors = W1ThermSensor.get_available_sensors()
     logger.info("Found %s sensors" % (len(get_sensors)))
     return get_sensors
 
+
 def publish_config(sensors):
     if homeassistant == "true":
         for sensor in sensors:
+            ha_topic = "homeassistant/sensor/"
             device_json = device_config(sensor.id, sensor.type_name)
             logger.info("Publishing config for sensor " + sensor.id)
-            client.publish("homeassistant/sensor/" + sensor.id + "/temp/config",device_json)
+            client.publish(ha_topic + sensor.id + "/temp/config", device_json)
+
 
 def publish_sensors(sensors):
     for sensor in sensors:
-        temperature = sensor.get_temperature()
+        temp = sensor.get_temperature()
         logger.info("%s %s %.2f%sC" % (sensor.type_name, sensor.id, temperature, degree))
-        client.publish(topic + "/sensor/" + sensor.id +'/state', round(temperature,2))
+        client.publish(topic + "/sensor/" + sensor.id + '/state', round(temp, 2))
     logger.info("Sleeping for %s seconds" % (interval))
     time.sleep(float(interval))
-    
+
 
 def main():
     global degree
