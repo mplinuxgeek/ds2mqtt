@@ -67,7 +67,7 @@ def on_disconnect(client, userdata, rc):
         logger.error("Unexpected disconnection. RC = " + str(rc))
 
 def on_publish(client, userdata, mid):
-    logger.info("Message " +str(mid)+ " published.")
+    logger.info("Message " +str(userdata)+ " published.")
                     
 def device_config(id, name):
     device = {}
