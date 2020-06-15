@@ -15,7 +15,7 @@ def keyboardInterruptHandler(signal, frame):
     logger.info("KeyboardInterrupt (ID: {}), exiting...".format(signal))
     exit(0)
 
-def setupLogging():
+def setup_logging():
     global logger
     logger = logging.getLogger(os.path.basename(__file__))
     logger.setLevel(logging.DEBUG)
@@ -86,6 +86,7 @@ def device_config(id, name):
 
 def connect_to_broker(host):
     global client
+    logger.info("Connecting to " + broker)
     mqtt.Client.connected = False
     client = mqtt.Client()
     client.on_connect = on_connect
@@ -95,6 +96,8 @@ def connect_to_broker(host):
         client.username_pw_set(username, password=password)
     client.connect(host)
     client.loop_start()
+    while not client.connected:
+        time.sleep(0.2)
 
 def get_config():
     global config, homeassistant, interval, broker, port, username, password, topic
@@ -115,28 +118,32 @@ def get_config():
     password = get_config_safe('mqtt', 'password')
     topic = get_config_safe('mqtt', 'topic')
 
-signal.signal(signal.SIGINT, keyboardInterruptHandler)
-setupLogging()
-get_config()
-connect_to_broker(broker)
+def get_sensors():
+    get_sensors = W1ThermSensor.get_available_sensors()
+    logger.info("Found %s sensors" % (len(sensors)))
+    return get_sensors
 
-logger.info("Connecting to " + broker)
-while not client.connected:
-    time.sleep(0.2)
+def publish_config(sensors):
+    if homeassistant == "true":
+        for sensor in sensors:
+            device_json = device_config(sensor.id, sensor.type_name)
+            logger.info("Publishing config for sensor " + sensor.id)
+            client.publish("homeassistant/sensor/" + sensor.id + "/temp/config",device_json)
 
-sensors = W1ThermSensor.get_available_sensors()
-logger.info("Found %s sensors" % (len(sensors)))
-
-if homeassistant == "true":
-    for sensor in sensors:
-        device_json = device_config(sensor.id, sensor.type_name)
-        logger.info("Publishing config for sensor " + sensor.id)
-        client.publish("homeassistant/sensor/" + sensor.id + "/temp/config",device_json)
-
-while True:
+def publish_sensors(sensors)
     for sensor in sensors:
         temperature = sensor.get_temperature()
         logger.info("%s %s %.2f%sC" % (sensor.type_name, sensor.id, temperature, degree))
         client.publish(topic + "/sensor/" + sensor.id +'/state', round(temperature,2))
     logger.info("Sleeping for %s seconds" % (interval))
     time.sleep(float(interval))
+    
+signal.signal(signal.SIGINT, keyboardInterruptHandler)
+
+setup_logging()
+get_config()
+connect_to_broker(broker)
+publish_config(get_sensors())
+
+while True:
+    publish_sensors(sensors)
