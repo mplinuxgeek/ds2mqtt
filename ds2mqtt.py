@@ -130,7 +130,7 @@ def publish_config(sensors):
             logger.info("Publishing config for sensor " + sensor.id)
             client.publish("homeassistant/sensor/" + sensor.id + "/temp/config",device_json)
 
-def publish_sensors(sensors)
+def publish_sensors(sensors):
     for sensor in sensors:
         temperature = sensor.get_temperature()
         logger.info("%s %s %.2f%sC" % (sensor.type_name, sensor.id, temperature, degree))
