@@ -1,41 +1,69 @@
 #!/usr/bin/env python
 
-import os
+import os.path
 import json
 import time
 import configparser
 import signal
+import logging
 from w1thermsensor import W1ThermSensor
 import paho.mqtt.client as mqtt
 
+degree = u"\N{DEGREE SIGN}"
+
 def keyboardInterruptHandler(signal, frame):
-    print("KeyboardInterrupt (ID: {}), exiting...".format(signal))
+    logger.info("KeyboardInterrupt (ID: {}), exiting...".format(signal))
     exit(0)
+
+def setupLogging():
+    global logger
+    logger = logging.getLogger(os.path.basename(__file__))
+    logger.setLevel(logging.DEBUG)
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+
+    fh = logging.FileHandler(os.path.basename(__file__) + '.log', mode='a', encoding=None, delay=False)
+    fh.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
+    ch.setFormatter(formatter)
+    fh.setFormatter(formatter)
+
+    logger.addHandler(ch)
+    logger.addHandler(fh)
+
+#logger.debug('debug message')
+#logger.info('info message')
+#logger.warn('warn message')
+#logger.error('error message')
+#logger.critical('critical message')
 
 def get_config_safe(section, option, default=None):
     try:
         return config.get(section, option)
     except (configparser.NoOptionError, configparser.NoSectionError, ValueError):
-        print('Could not find section [%s] option "%s"' % (section, option))
+        logger.info('Could not find section [%s] option "%s"' % (section, option))
         return default
 
 def on_connect(client, userdata, flags, rc):
     if int(str(rc)) == 0:
-        print("Connection successful")
+        logger.info("Connection successful")
         client.connected = True
     elif int(str(rc)) == 1:
-        print("Connection refused - incorrect protocol version")
+        logger.warn("Connection refused - incorrect protocol version")
     elif int(str(rc)) == 2:
-        print("Connection refused - invalid client identifier")
+        logger.warn("Connection refused - invalid client identifier")
     elif int(str(rc)) == 3:
-        print("Connection refused - server unavailable")
+        logger.warn("Connection refused - server unavailable")
     elif int(str(rc)) == 4:
-        print("Connection refused - bad username or password")
+        logger.warn("Connection refused - bad username or password")
     elif int(str(rc)) == 5:
-        print("Connection refused - not authorised")
+        logger.warn("Connection refused - not authorised")
 
 def on_message(client, userdata, msg):
-    print(msg.topic+" "+str(msg.qos)+" "+str(msg.payload)) 
+    logger.info(msg.topic+" "+str(msg.qos)+" "+str(msg.payload)) 
 
 def device_config(id, name):
     device = {}
@@ -52,49 +80,58 @@ def device_config(id, name):
     }
     return json.dumps(device)
 
+def connect_to_broker(host):
+    global client
+    mqtt.Client.connected = False
+    client = mqtt.Client()
+    client.on_connect = on_connect
+    client.on_message = on_message
+    if username != "" and password != "":
+        client.username_pw_set(username, password=password)
+    client.connect(host)
+    client.loop_start()
+
+def get_config():
+    global config, homeassistant, interval, broker, port, username, password, topic
+    config = configparser.ConfigParser()
+
+    try:
+        config.read('config.ini')
+    except configparser.ParsingError as e:
+        exit(5)
+    except configparser.ParsingError as e:
+        exit(5)
+
+    homeassistant = get_config_safe('general', 'homeassistant')
+    interval = get_config_safe('general', 'interval','30')
+    broker = get_config_safe('mqtt', 'broker')
+    port = get_config_safe('mqtt', 'port', '1884')
+    username = get_config_safe('mqtt', 'username')
+    password = get_config_safe('mqtt', 'password')
+    topic = get_config_safe('mqtt', 'topic')
+
 signal.signal(signal.SIGINT, keyboardInterruptHandler)
+setupLogging()
+get_config()
+connect_to_broker(broker)
 
-filename = 'config.ini'
-if not os.path.exists(filename):
-    print "File {} was not found".format(filename)
-    exit(5)
-
-config = configparser.ConfigParser()
-config.read('config.ini')
-
-homeassistant = get_config_safe('general', 'homeassistant')
-interval = get_config_safe('general', 'interval','30')
-broker = get_config_safe('mqtt', 'broker')
-port = get_config_safe('mqtt', 'port', '1884')
-user = get_config_safe('mqtt', 'user')
-password = get_config_safe('mqtt', 'pass')
-topic = get_config_safe('mqtt', 'topic')
-
-degree = u"\N{DEGREE SIGN}"
-
-mqtt.Client.connected = False
-client = mqtt.Client()
-client.on_connect = on_connect
-client.on_message = on_message
-if user != "" and password != "":
-    client.username_pw_set(user, password=password)
-client.connect(broker)
-client.loop_start()
-
-print("Connecting to " + broker)
+logger.info("Connecting to " + broker)
 while not client.connected:
     time.sleep(0.2)
 
+sensors = W1ThermSensor.get_available_sensors()
+logger.info("Found %s sensors" % (len(sensors)))
+
 if homeassistant == "true":
-    for sensor in W1ThermSensor.get_available_sensors():
-        device = device_config(sensor.id, sensor.type_name)
-        print("Publishing config for sensor " + sensor.id)
-        client.publish("homeassistant/sensor/" + sensor.id + "/temp/config",device)
+    for sensor in sensors:
+        device_json = device_config(sensor.id, sensor.type_name)
+        logger.info("Publishing config for sensor " + sensor.id)
+        client.publish("homeassistant/sensor/" + sensor.id + "/temp/config",device_json)
 
 while True:
-    for sensor in W1ThermSensor.get_available_sensors():
+    for sensor in sensors:
         temperature = sensor.get_temperature()
-        print("%s %s %.2f%sC" % (sensor.type_name, sensor.id, temperature, degree))
+        logger.info("%s %s %.2f%sC" % (sensor.type_name, sensor.id, temperature, degree))
         client.publish(topic + "/sensor/" + sensor.id +'/state', round(temperature,2))
-    print("Sleeping for %s seconds" % (interval))
+    logger.info("Sleeping for %s seconds" % (interval))
     time.sleep(float(interval))
