@@ -68,6 +68,7 @@ def on_connect(client, userdata, flags, rc):
 def on_disconnect(client, userdata, rc):
     if rc != 0:
         logger.error("Unexpected disconnection. RC = " + str(rc))
+        client.connected = False
 
 
 def on_publish(client, userdata, mid):
@@ -160,7 +161,8 @@ def main():
     sensors = get_sensors()
     publish_config(sensors)
     while True:
-        publish_sensors(sensors)
+        if client.connected is True:
+            publish_sensors(sensors)
 
 if __name__ == "__main__":
     main()
