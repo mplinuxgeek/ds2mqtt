@@ -146,7 +146,10 @@ def publish_sensors(sensors):
     for sensor in sensors:
         temp = sensor.get_temperature()
         logger.info("%s %s %.2f%sC" % (sensor.type_name, sensor.id, temp, degree))
-        client.publish(topic + "/sensor/" + sensor.id + '/state', round(temp, 2))
+        if client.connected is True:
+            client.publish(topic + "/sensor/" + sensor.id + '/state', round(temp, 2))
+        else:
+            logger.warn('Cannot publish, not connected to broker')
     logger.info("Sleeping for %s seconds" % (interval))
     time.sleep(float(interval))
 
@@ -161,8 +164,7 @@ def main():
     sensors = get_sensors()
     publish_config(sensors)
     while True:
-        if client.connected is True:
-            publish_sensors(sensors)
+        publish_sensors(sensors)
 
 if __name__ == "__main__":
     main()
