@@ -146,4 +146,4 @@ connect_to_broker(broker)
 publish_config(get_sensors())
 
 while True:
-    publish_sensors(sensors)
+    publish_sensors(get_sensors())
