@@ -143,7 +143,8 @@ signal.signal(signal.SIGINT, keyboardInterruptHandler)
 setup_logging()
 get_config()
 connect_to_broker(broker)
-publish_config(get_sensors())
+sensors = get_sensors()
+publish_config(sensors)
 
 while True:
-    publish_sensors(get_sensors())
+    publish_sensors(sensors)
