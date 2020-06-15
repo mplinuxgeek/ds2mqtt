@@ -9,8 +9,6 @@ import logging
 from w1thermsensor import W1ThermSensor
 import paho.mqtt.client as mqtt
 
-degree = u"\N{DEGREE SIGN}"
-
 def keyboardInterruptHandler(signal, frame):
     logger.info("KeyboardInterrupt (ID: {}), exiting...".format(signal))
     exit(0)
@@ -140,6 +138,7 @@ def publish_sensors(sensors):
     
 
 def main():
+    degree = u"\N{DEGREE SIGN}"
     signal.signal(signal.SIGINT, keyboardInterruptHandler)
     setup_logging()
     get_config()
