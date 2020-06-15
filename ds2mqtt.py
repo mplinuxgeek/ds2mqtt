@@ -145,7 +145,7 @@ def publish_config(sensors):
 def publish_sensors(sensors):
     for sensor in sensors:
         temp = sensor.get_temperature()
-        logger.info("Publishing sensor %s %s %.2f%sC" % (sensor.type_name, sensor.id, temp, degree))
+        logger.info("Publishing sensor %s (%s), temperature: %.2f%sC" % (sensor.id, sensor.type_name, temp, degree))
         if client.connected is True:
             client.publish(topic + "/sensor/" + sensor.id + '/state', round(temp, 2))
         else:
