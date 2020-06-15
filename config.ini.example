@@ -4,6 +4,6 @@ interval = 30
 [mqtt]
 broker = 192.168.1.60
 port = 1884
-user = 
-pass = 
+username = 
+password = 
 topic = ds2mqtt
