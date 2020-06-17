@@ -117,6 +117,7 @@ def get_config():
         # could not read file - log the error and quit
     except configparser.ParsingError as e:
         # error parsing file - log the error and quit
+        logger.error('error message')
 
     homeassistant = get_config_safe('general', 'homeassistant')
     interval = get_config_safe('general', 'interval', '30')
