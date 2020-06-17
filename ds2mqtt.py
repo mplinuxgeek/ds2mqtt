@@ -173,7 +173,7 @@ def main():
     try:
         connect_to_broker(str(broker))
     except Exception as e:
-        print("Exceptio, ", e.__class__, "occurred.")
+        print("Exception, ", e.__class__, "occurred.")
         print(e.__class__.__module__)
         print(e.__class__.__name__)
 
