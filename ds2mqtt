@@ -21,24 +21,21 @@ def setup_logging():
     logger = logging.getLogger(os.path.basename(__file__))
     logger.setLevel(logging.DEBUG)
 
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
 
     try:
         logfile = '/var/log/' + os.path.basename(__file__) + '.log'
         fh = logging.FileHandler(logfile, mode='a', encoding=None, delay=False)
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
     except IOError:
         print('Failed to write ' + logfile)
-        
-    fh.setLevel(logging.DEBUG)
-
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-
-    ch.setFormatter(formatter)
-    fh.setFormatter(formatter)
-
-    logger.addHandler(ch)
-    logger.addHandler(fh)
 
 # logger.debug('debug message')
 # logger.info('info message')
