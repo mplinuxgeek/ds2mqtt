@@ -6,9 +6,10 @@ import time
 import configparser
 import signal
 import logging
+import sys
 from w1thermsensor import W1ThermSensor
 import paho.mqtt.client as mqtt
-
+import socket
 
 def keyboardInterruptHandler(signal, frame):
     logger.info("KeyboardInterrupt (ID: {}), exiting...".format(signal))
@@ -53,8 +54,7 @@ def on_connect(client, userdata, flags, rc):
     if int(str(rc)) == 0:
         logger.info("Connection successful")
         client.connected = True
-    elif int(str(rc)) == 1:
-        logger.warn("Connection refused - incorrect protocol version")
+    elif int(str(rc)) == 1:        logger.warn("Connection refused - incorrect protocol version")
     elif int(str(rc)) == 2:
         logger.warn("Connection refused - invalid client identifier")
     elif int(str(rc)) == 3:
@@ -92,44 +92,49 @@ def device_config(id, name):
 
 
 def connect_to_broker(host):
+    global client
+    logger.info("Connecting to " + host)
+    mqtt.Client.connected = False
+    client = mqtt.Client()
+    client.on_connect = on_connect
+    client.on_disconnect = on_disconnect
+    # client.on_message = on_message
+    # client.on_publish = on_publish
+    if username != "" and password != "":
+        client.username_pw_set(username, password=password)
+
     try:
-        global client
-        logger.info("Connecting to " + broker)
-        mqtt.Client.connected = False
-        client = mqtt.Client()
-        client.on_connect = on_connect
-        # client.on_message = on_message
-        # client.on_publish = on_publish
-        if username != "" and password != "":
-            client.username_pw_set(username, password=password)
         client.connect(host)
-        client.loop_start()
-        while not client.connected:
-            time.sleep(0.2)
-    except:
-        print("Unexpected error:", sys.exc_info()[0])
-        raise
+    except socket.gaierror as e:
+        logger.critical("Invalid host, " + str(broker))
+        exit(69)
+    except socket.error as e:
+        logger.critical("Could not connect to " + str(broker))
+        exit(69)
+
+    client.loop_start()
+    while not client.connected:
+        time.sleep(0.2)
 
 
 def get_config():
     global config, homeassistant, interval, broker, port, username, password, topic
     config = configparser.ConfigParser()
 
-    #try:
-    config.read('config.ini')
-    #except OSError as e:
-        # could not read file - log the error and quit
-    #except configparser.ParsingError as e:
-        # error parsing file - log the error and quit
-    #    logger.error('error message')
+    try:
+        with open('config.ini') as file:
+            config.readfp(file)
+    except IOError:
+        logger.error("Failed to open config.ini")
+        exit(66)
 
     homeassistant = get_config_safe('general', 'homeassistant', False)
     interval = get_config_safe('general', 'interval', '30')
     broker = get_config_safe('mqtt', 'broker', None)
     port = get_config_safe('mqtt', 'port', '1884')
-    username = get_config_safe('mqtt', 'username', None)
-    password = get_config_safe('mqtt', 'password', None)
-    topic = get_config_safe('mqtt', 'topic', None)
+    username = get_config_safe('mqtt', 'username', "")
+    password = get_config_safe('mqtt', 'password', "")
+    topic = get_config_safe('mqtt', 'topic', "")
 
 
 def get_sensors():
@@ -165,7 +170,13 @@ def main():
     signal.signal(signal.SIGINT, keyboardInterruptHandler)
     setup_logging()
     get_config()
-    connect_to_broker(broker)
+    try:
+        connect_to_broker(str(broker))
+    except Exception as e:
+        print("Exceptio, ", e.__class__, "occurred.")
+        print(e.__class__.__module__)
+        print(e.__class__.__name__)
+
     sensors = get_sensors()
     publish_config(sensors)
     while True:
