@@ -101,9 +101,12 @@ def connect_to_broker(host):
     # client.on_publish = on_publish
     if username != "" and password != "":
         client.username_pw_set(username, password=password)
-    if host != "":
+    try:
         client.connect(host)
         client.loop_start()
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
     while not client.connected:
         time.sleep(0.2)
 
