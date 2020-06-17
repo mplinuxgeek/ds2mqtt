@@ -29,7 +29,7 @@ def setup_logging():
     logger.addHandler(ch)
 
     try:
-        logfile = '/var/log/' + os.path.basename(__file__) + '.log'
+        logfile = '/tmp/' + os.path.basename(__file__) + '.log'
         fh = logging.FileHandler(logfile, mode='a', encoding=None, delay=False)
         fh.setLevel(logging.DEBUG)
         fh.setFormatter(formatter)
