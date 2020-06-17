@@ -113,10 +113,10 @@ def get_config():
 
     try:
         config.read('config.ini')
+    #except OSError as e:
+        # could not read file - log the error and quit
     except configparser.ParsingError as e:
-        exit(5)
-    except configparser.ParsingError as e:
-        exit(5)
+        # error parsing file - log the error and quit
 
     homeassistant = get_config_safe('general', 'homeassistant')
     interval = get_config_safe('general', 'interval', '30')
