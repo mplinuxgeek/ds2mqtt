@@ -25,11 +25,10 @@ def setup_logging():
     ch.setLevel(logging.DEBUG)
 
     try:
-        fh = logging.FileHandler(os.path.basename(__file__) + '.log', mode='a', encoding=None, delay=False)
-    except Exception as e:
-        print("Exception, ", e.__class__, "occurred.")
-        print(e.__class__.__module__)
-        print(e.__class__.__name__)
+        logfile = '/var/log/' + os.path.basename(__file__) + '.log'
+        fh = logging.FileHandler(logfile, mode='a', encoding=None, delay=False)
+    except PermissionError:
+        print('Failed to write ' + logfile)
         
     fh.setLevel(logging.DEBUG)
 
