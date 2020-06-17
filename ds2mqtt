@@ -35,7 +35,7 @@ def setup_logging():
         fh.setFormatter(formatter)
         logger.addHandler(fh)
     except IOError:
-        print('Failed to write ' + logfile)
+        logger.warn('Failed to write ' + logfile)
 
 # logger.debug('debug message')
 # logger.info('info message')
