@@ -1,7 +1,7 @@
 # DS2MQTT
 Python script for reading DS18B20 sensors and publishing the values via MQTT with Home Assistant config/discovery support.
 
-# Installation:
+## Installation:
 
 ```
 sudo git clone https://github.com/mplinuxgeek/ds2mqtt /opt/ds2mqtt
@@ -11,7 +11,7 @@ cp config.ini.example config.ini
 nano config.ini
 ```
 
-# Running:
+## Running:
 
 ```
 cd /opt/ds2mqtt/
@@ -19,7 +19,7 @@ ds2mqtt
 CTRL+C to exit
 ```
 
-# Service
+## Service
 I've included a service file for use with systemd, providing the above installation steps were followed the service file will work.
 
 ```
