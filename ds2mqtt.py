@@ -111,13 +111,13 @@ def get_config():
     global config, homeassistant, interval, broker, port, username, password, topic
     config = configparser.ConfigParser()
 
-    try:
-        config.read('config.ini')
+    #try:
+    config.read('config.ini')
     #except OSError as e:
         # could not read file - log the error and quit
-    except configparser.ParsingError as e:
+    #except configparser.ParsingError as e:
         # error parsing file - log the error and quit
-        logger.error('error message')
+    #    logger.error('error message')
 
     homeassistant = get_config_safe('general', 'homeassistant')
     interval = get_config_safe('general', 'interval', '30')
