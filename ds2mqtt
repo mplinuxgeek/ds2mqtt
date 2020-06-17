@@ -24,7 +24,13 @@ def setup_logging():
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
 
-    fh = logging.FileHandler(os.path.basename(__file__) + '.log', mode='a', encoding=None, delay=False)
+    try:
+        fh = logging.FileHandler(os.path.basename(__file__) + '.log', mode='a', encoding=None, delay=False)
+    except Exception as e:
+        print("Exception, ", e.__class__, "occurred.")
+        print(e.__class__.__module__)
+        print(e.__class__.__name__)
+        
     fh.setLevel(logging.DEBUG)
 
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
