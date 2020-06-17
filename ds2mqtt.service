@@ -1,0 +1,14 @@
+[Unit]
+Description=ds2mqtt
+After=network.target
+
+[Service]
+ExecStart=/opt/ds2mqtt/ds2mqtt
+WorkingDirectory=/opt/ds2mqtt
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
