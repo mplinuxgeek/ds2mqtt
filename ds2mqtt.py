@@ -92,23 +92,23 @@ def device_config(id, name):
 
 
 def connect_to_broker(host):
-    global client
-    logger.info("Connecting to " + broker)
-    mqtt.Client.connected = False
-    client = mqtt.Client()
-    client.on_connect = on_connect
-    # client.on_message = on_message
-    # client.on_publish = on_publish
-    if username != "" and password != "":
-        client.username_pw_set(username, password=password)
     try:
+        global client
+        logger.info("Connecting to " + broker)
+        mqtt.Client.connected = False
+        client = mqtt.Client()
+        client.on_connect = on_connect
+        # client.on_message = on_message
+        # client.on_publish = on_publish
+        if username != "" and password != "":
+            client.username_pw_set(username, password=password)
         client.connect(host)
         client.loop_start()
+        while not client.connected:
+            time.sleep(0.2)
     except:
         print("Unexpected error:", sys.exc_info()[0])
         raise
-    while not client.connected:
-        time.sleep(0.2)
 
 
 def get_config():
