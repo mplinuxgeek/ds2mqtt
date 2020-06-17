@@ -119,13 +119,13 @@ def get_config():
         # error parsing file - log the error and quit
     #    logger.error('error message')
 
-    homeassistant = get_config_safe('general', 'homeassistant')
+    homeassistant = get_config_safe('general', 'homeassistant', False)
     interval = get_config_safe('general', 'interval', '30')
-    broker = get_config_safe('mqtt', 'broker')
-    port = get_config_safe('mqtt', 'port', '1884')
-    username = get_config_safe('mqtt', 'username')
-    password = get_config_safe('mqtt', 'password')
-    topic = get_config_safe('mqtt', 'topic')
+    broker = get_config_safe('mqtt', 'broker', None)
+    port = get_config_safe('mqtt', 'port', '1884', None)
+    username = get_config_safe('mqtt', 'username', None)
+    password = get_config_safe('mqtt', 'password', None)
+    topic = get_config_safe('mqtt', 'topic', None)
 
 
 def get_sensors():
