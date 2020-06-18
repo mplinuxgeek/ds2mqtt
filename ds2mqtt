@@ -132,14 +132,14 @@ def get_config():
 
     homeassistant = get_config_safe('general', 'homeassistant', False)
     interval = get_config_safe('general', 'interval', '30')
-    unit = get_config_safe('general', 'interval', 'C')
+    unit = get_config_safe('general', 'unit', 'C')
     broker = get_config_safe('mqtt', 'broker', None)
     port = get_config_safe('mqtt', 'port', '1884')
     username = get_config_safe('mqtt', 'username', "")
     password = get_config_safe('mqtt', 'password', "")
     topic = get_config_safe('mqtt', 'topic', "")
-    #if unit.upper() not in ('C', 'F', 'K'):
-    #    unit = 'C'
+    if unit.upper() not in ('C', 'F', 'K'):
+        unit = 'C'
 
 def get_sensors():
     get_sensors = W1ThermSensor.get_available_sensors()
