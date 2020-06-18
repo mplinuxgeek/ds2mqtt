@@ -161,7 +161,7 @@ def publish_sensors(sensors):
         if unit.upper() == 'F':
             temp = sensor.get_temperature(W1ThermSensor.DEGREES_F)
         elif unit.upper() == 'K':
-            temp = sensor.get_temperature(W1ThermSensor.DEGREES_F)
+            temp = sensor.get_temperature(W1ThermSensor.KELVIN)
         else:
             temp = sensor.get_temperature()
 
