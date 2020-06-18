@@ -79,7 +79,7 @@ def on_publish(client, userdata, mid):
 
 def device_config(id, name):
     device = {}
-    device['unit_of_measurement'] = degree + 'C'
+    device['unit_of_measurement'] = degree + unit
     device['icon'] = 'mdi:thermometer'
     device['name'] = id
     device['state_topic'] = topic + '/sensor/' + id + '/state'
@@ -132,6 +132,7 @@ def get_config():
 
     homeassistant = get_config_safe('general', 'homeassistant', False)
     interval = get_config_safe('general', 'interval', '30')
+    unit = get_config_safe('general', 'interval', 'C')
     broker = get_config_safe('mqtt', 'broker', None)
     port = get_config_safe('mqtt', 'port', '1884')
     username = get_config_safe('mqtt', 'username', "")
@@ -156,7 +157,13 @@ def publish_config(sensors):
 
 def publish_sensors(sensors):
     for sensor in sensors:
-        temp = sensor.get_temperature()
+        if unit.upper() = 'F'
+            temp = sensor.get_temperature(Unit.DEGREES_F)
+        elif unit.upper() = 'K':
+            temp = sensor.get_temperature(Unit.DEGREES_F)
+        else:
+            temp = sensor.get_temperature()
+
         logger.info("Publishing sensor %s (%s), temperature: %.2f%sC" % (sensor.id, sensor.type_name, temp, degree))
         if client.connected is True:
             client.publish(topic + "/sensor/" + sensor.id + '/state', round(temp, 2))
@@ -172,6 +179,9 @@ def main():
     signal.signal(signal.SIGINT, keyboardInterruptHandler)
     setup_logging()
     get_config()
+    if unit.upper() not in ('C', 'F', 'K'):
+        unit = 'C'
+        
     try:
         connect_to_broker(str(broker))
     except Exception as e:
