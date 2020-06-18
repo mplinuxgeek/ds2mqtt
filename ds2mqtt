@@ -138,8 +138,8 @@ def get_config():
     username = get_config_safe('mqtt', 'username', "")
     password = get_config_safe('mqtt', 'password', "")
     topic = get_config_safe('mqtt', 'topic', "")
-    if unit.upper() not in ('C', 'F', 'K'):
-        unit = 'C'
+    #if unit.upper() not in ('C', 'F', 'K'):
+    #    unit = 'C'
 
 def get_sensors():
     get_sensors = W1ThermSensor.get_available_sensors()
