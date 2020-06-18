@@ -15,7 +15,7 @@ nano config.ini
 
 ```
 cd /opt/ds2mqtt/
-ds2mqtt
+./ds2mqtt
 CTRL+C to exit
 ```
 
