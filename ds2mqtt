@@ -157,7 +157,7 @@ def publish_config(sensors):
 
 def publish_sensors(sensors):
     for sensor in sensors:
-        if unit.upper() == 'F'
+        if unit.upper() == 'F':
             temp = sensor.get_temperature(Unit.DEGREES_F)
         elif unit.upper() == 'K':
             temp = sensor.get_temperature(Unit.DEGREES_F)
