@@ -1,6 +1,10 @@
 [general]
+# Publish Home Assistant discovery config data, automatically adds the sensor to Home Assistant
 homeassistant = true
+# Interval between data publishing in seconds
 interval = 30
+# Supported units are Celsius, Fahrenheit and Kelvin. Valid unit options are c, f, and k.
+unit = C
 [mqtt]
 broker = 192.168.1.60
 port = 1884
