@@ -3,6 +3,15 @@ Python script for reading DS18B20 sensors and publishing the values via MQTT wit
 
 ## Installation:
 
+Make sure python3 is set as default and install the following dependencies:
+
+```
+sudo pip3 install paho-mqtt
+sudo apt-get install python3-w1thermsensor
+```
+
+Then install ds2mqtt:
+
 ```
 sudo git clone https://github.com/mplinuxgeek/ds2mqtt /opt/ds2mqtt
 sudo chown -R pi:pi /opt/ds2mqtt
