@@ -151,7 +151,7 @@ def publish_config(sensors):
     if homeassistant == "true":
         for sensor in sensors:
             ha_topic = "homeassistant/sensor/"
-            device_json = device_config(sensor.id, sensor.type_name)
+            device_json = device_config(sensor.id, sensor.type.name)
             logger.info("Publishing config for sensor " + sensor.id)
             client.publish(ha_topic + sensor.id + "/temp/config", device_json)
 
@@ -165,7 +165,7 @@ def publish_sensors(sensors):
         else:
             temp = sensor.get_temperature()
 
-        logger.info("Publishing sensor %s (%s), temperature: %.2f%s%s" % (sensor.id, sensor.type_name, temp, degree, unit.upper()))
+        logger.info("Publishing sensor %s (%s), temperature: %.2f%s%s" % (sensor.id, sensor.type.name, temp, degree, unit.upper()))
         if client.connected is True:
             client.publish(topic + "/sensor/" + sensor.id + '/state', round(temp, 2))
         else:
