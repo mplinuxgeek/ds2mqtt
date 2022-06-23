@@ -7,7 +7,7 @@ import configparser
 import signal
 import logging
 import sys
-from w1thermsensor import W1ThermSensor
+from w1thermsensor import W1ThermSensor, Unit
 import paho.mqtt.client as mqtt
 import socket
 
@@ -151,7 +151,7 @@ def publish_config(sensors):
     if homeassistant == "true":
         for sensor in sensors:
             ha_topic = "homeassistant/sensor/"
-            device_json = device_config(sensor.id, sensor.type_name)
+            device_json = device_config(sensor.id, sensor.type.name)
             logger.info("Publishing config for sensor " + sensor.id)
             client.publish(ha_topic + sensor.id + "/temp/config", device_json)
 
@@ -159,13 +159,13 @@ def publish_config(sensors):
 def publish_sensors(sensors):
     for sensor in sensors:
         if unit.upper() == 'F':
-            temp = sensor.get_temperature(W1ThermSensor.DEGREES_F)
+            temp = sensor.get_temperature(Unit.DEGREES_F)
         elif unit.upper() == 'K':
-            temp = sensor.get_temperature(W1ThermSensor.KELVIN)
+            temp = sensor.get_temperature(Unit.KELVIN)
         else:
             temp = sensor.get_temperature()
 
-        logger.info("Publishing sensor %s (%s), temperature: %.2f%s%s" % (sensor.id, sensor.type_name, temp, degree, unit.upper()))
+        logger.info("Publishing sensor %s (%s), temperature: %.2f%s%s" % (sensor.id, sensor.type.name, temp, degree, unit.upper()))
         if client.connected is True:
             client.publish(topic + "/sensor/" + sensor.id + '/state', round(temp, 2))
         else:
